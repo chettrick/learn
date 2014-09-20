@@ -1,5 +1,5 @@
-/* defines for learn.
- * $OpenBSD: learn.h,v 1.2 1998/09/28 16:40:17 ian Exp $
+/*
+ * defines for learn.
  */
 
 #define	READY	0
