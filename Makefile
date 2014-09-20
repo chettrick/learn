@@ -6,6 +6,8 @@ LLIB = /usr/share/learn	# must agree with pathnames.h
 
 CFLAGS += -g
 
+CLEANFILES+=	lcount tee
+
 all:	learn tee lcount
 
 # tee and lcount must be installed in LLIB!
@@ -18,8 +20,5 @@ install:	all
 check:
 	-@test -r $(LLIB)/tee || echo 'tee not present; make tee'
 	-@test -r $(LLIB)/lcount || echo 'lcount not present; make lcount'
-
-
-# clean rule should also remove tee and lcount
 
 .include <bsd.prog.mk>
