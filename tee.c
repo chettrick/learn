@@ -24,13 +24,21 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 char *PS1;
 
+static char ln[5120];
+char *p = ln;
+
+void put(char, int);
+void fl(int);
+
 int
-main()
+main(void)
 {
 	int f;
 	char c;
@@ -48,9 +56,8 @@ main()
 	return 0;
 }
 
-static char ln[5120];
-char *p = ln;
-put(c, f)
+void
+put(char c, int f)
 {
 	*p++ = c;
 	if (c == '\n') {
@@ -58,7 +65,9 @@ put(c, f)
 		p=ln;
 	}
 }
-fl(f)
+
+void
+fl(int f)
 {
 	char *s;
 
