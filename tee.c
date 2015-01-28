@@ -25,6 +25,7 @@ THIS SOFTWARE.
 ****************************************************************/
 
 #include <stdlib.h>
+#include <string.h>
 
 char *PS1;
 
