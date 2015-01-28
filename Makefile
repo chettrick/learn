@@ -18,7 +18,7 @@ afterinstall:	${LPROGS}
 	install -d ${LLIB}
 	install -c -S -s -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
 	    ${LPROGS} ${LLIB}
-	cp -R ${.CURDIR}/lib ${LLIB}
+	cp -R ${.CURDIR}/lib/* ${LLIB}
 
 uninstall:
 	rm ${BINDIR}/${PROG}
