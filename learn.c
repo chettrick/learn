@@ -32,6 +32,7 @@ THIS SOFTWARE.
 #include <signal.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "learn.h"
@@ -101,7 +102,7 @@ void intrpt(int x)
 
 
 char last[1024];
-char logf[1024];
+char logfile[1024];
 char subdir[1024];
 
 copy(prompt, fin)
@@ -110,7 +111,8 @@ FILE *fin;
 	FILE *fout, *f;
 	char s[200], t[200], s1[200], *r, *tod;
 	char nm[100];
-	int *p, tv[2];
+	int *p;
+	time_t tval;
 	extern int *action();
 	extern char *wordb();
 	int nmatch = 0;
@@ -262,13 +264,13 @@ FILE *fin;
 		case LOG:
 			if (!logging)
 				break;
-			if (logf[0] == 0)
-				snprintf(logf, sizeof logf, "%s/log/%s", direct, sname);
-			f = fopen( (r? r : logf), "a");
+			if (logfile[0] == 0)
+				snprintf(logfile, sizeof logfile, "%s/log/%s", direct, sname);
+			f = fopen((r ? r : logfile), "a");
 			if (f == NULL)
 				break;
-			time(tv);
-			tod = ctime(tv);
+			time(&tval);
+			tod = ctime(&tval);
 			tod[24] = 0;
 			fprintf(f, "%s L%-6s %s %2d %s\n", tod,
 				todo, status? "fail" : "pass", speed, pwline);
