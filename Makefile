@@ -1,22 +1,28 @@
-PROG = learn
+PROG=		learn
+LPROGS=		lcount tee
 
-LLIB = /usr/share/learn	# must agree with pathnames.h
+PREFIX?=	/usr/local
+BINDIR?=	${PREFIX}/bin
+MANDIR?=	${PREFIX}/man/man
+LLIB=		${PREFIX}/share/learn
 
-CFLAGS += -g
+CFLAGS+=	-g
 
-CLEANFILES+=	lcount tee
+CLEANFILES+=	${LPROGS}
 
-all:	learn tee lcount
+all:		${PROG} ${LPROGS}
 
 # tee and lcount must be installed in LLIB!
 # old makefile installed learn into LLIB as well - is it needed there?
-install:	all
-	echo install -o ${BINOWN} -g ${BINGRP} -m 444 learn \
-			${DESTDIR}${BINDIR}/learn; \
-	install -o ${BINOWN} -g ${BINGRP} tee lcount $(LLIB)
+afterinstall:	${LPROGS}
+	install -d ${LLIB}
+	install -c -S -s -o ${BINOWN} -g ${BINGRP} -m ${BINMODE} \
+	    ${LPROGS} ${LLIB}
+	cp -R ${.CURDIR}/lib ${LLIB}
 
-check:
-	-@test -r $(LLIB)/tee || echo 'tee not present; make tee'
-	-@test -r $(LLIB)/lcount || echo 'lcount not present; make lcount'
+uninstall:
+	rm ${BINDIR}/${PROG}
+	rm ${MANDIR}1/${PROG}.1
+	rm -R ${LLIB}
 
 .include <bsd.prog.mk>
