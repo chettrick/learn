@@ -1,6 +1,6 @@
 #print
 Use the "ls" command to determine if there is a file
-named for a state in the current directory.
+named for a US state in the current directory.
 Find out and type "yes" or "no".
 (Don't use the list you got earlier - I've changed things.)
 #create texas
