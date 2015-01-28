@@ -896,7 +896,7 @@ retry:
 	}
 	if (best < 0 && nsave) {
 		nsave--;
-		strcpy(level, saved);
+		strlcpy(level, saved, sizeof level);
 		goto retry;
 	}
 	if (best <0) {
@@ -1001,7 +1001,7 @@ whatnow()
 		return;
 	}
 	if (didok) {
-		strcpy(level,todo);
+		strlcpy(level, todo, sizeof level);
 		if (speed<=9) speed++;
 	}
 	else {
