@@ -27,6 +27,9 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
+#include <sys/wait.h>
+
+#include <err.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <signal.h>
@@ -57,12 +60,8 @@ int	logging	= 0;	/* set to 0 to turn off logging */
 int	ask;
 
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
-	extern char * getlogin();
-	void hangup(int signum);
-	void intrpt(int signum);
-
 	speed = 0;
 	more = 1;
 	pwline = getlogin();
@@ -79,12 +78,14 @@ main(int argc, char **argv)
 	return 0;
 }
 
-void hangup(int x)
+void
+hangup(int x)
 {
 	wrapup(1);
 }
 
-void intrpt(int x)
+void
+intrpt(int x)
 {
 	char response[20], *p;
 
@@ -100,13 +101,12 @@ void intrpt(int x)
 	signal(SIGINT, intrpt);
 }
 
-
 char last[1024];
 char logfile[1024];
 char subdir[1024];
 
-copy(prompt, fin)
-FILE *fin;
+void
+copy(int prompt, FILE *fin)
 {
 	FILE *fout, *f;
 	char s[200], t[200], s1[200], *r, *tod;
@@ -120,7 +120,7 @@ FILE *fin;
 	if (subdir[0]==0)
 		snprintf(subdir, sizeof subdir, "%s/%s", _PATH_LLIB, sname);
 	for (;;) {
-		if (pgets(s, sizeof s, prompt, fin) == 0)
+		if (pgets(s, sizeof s, prompt, fin) == 0) {
 			if (fin == stdin) {
 				/* fprintf(stderr, "Don't type control-D\n"); */
 				/* this didn't work out very well */
@@ -128,6 +128,7 @@ FILE *fin;
 				continue;
 			} else
 				break;
+		}
 		trim(s);
 		/* change the sequence %s to lesson directory */
 		/* if needed */
@@ -281,6 +282,7 @@ FILE *fin;
 	return;
 }
 
+int
 pgets(char *s, int len, int prompt, FILE *f)
 {
 	if (prompt) {
@@ -301,8 +303,8 @@ trim(char *s)
 	s[strcspn(s, "\n")] = '\0';
 }
 
-scopy(fi, fo)	/* copy fi to fo until a line with # */
-FILE *fi, *fo;
+void
+scopy(FILE *fi, FILE *fo)	/* copy fi to fo until a line with # */
 {
 	int c;
 
@@ -320,8 +322,8 @@ FILE *fi, *fo;
 		fflush(fo);
 }
 
-cmp(r)	/* compare two files for status */
-char *r;
+int
+cmp(char *r)	/* compare two files for status */
 {
 	char *s;
 	FILE *f1, *f2;
@@ -353,12 +355,11 @@ char *r;
 }
 
 char *
-wordb(s, t)	/* in s, t is prefix; return tail */
-char *s, *t;
+wordb(char *s, char *t)	/* in s, t is prefix; return tail */
 {
 	int c;
 
-	while (c = *s++) {
+	while ((c = *s++) != 0) {
 		if (c == ' ' || c == '\t')
 			break;
 		*t++ = c;
@@ -369,8 +370,8 @@ char *s, *t;
 	return(c ? s : NULL);
 }
 
-
-dounit()
+void
+dounit(void)
 {
 	char tbuff[100];
 
@@ -432,8 +433,8 @@ retry:
 
 int istop;
 
-list(r)
-char *r;
+void
+list(char *r)
 {
 	void stop(int);
 	FILE *ft;
@@ -452,12 +453,14 @@ char *r;
 	signal(SIGINT, intrpt);
 }
 
-void stop(int x)
+void
+stop(int x)
 {
 	istop=0;
 }
 
-makpipe()
+int
+makpipe(void)
 {
 	int f[2];
 
@@ -479,7 +482,8 @@ makpipe()
 static int oldout;
 static char tee[100];
 
-maktee()
+int
+maktee(void)
 {
 	int fpip[2], in, out;
 
@@ -508,7 +512,8 @@ maktee()
 	return(1);
 }
 
-untee()
+void
+untee(void)
 {
 	int x;
 
@@ -558,8 +563,8 @@ struct keys {
 	{NULL,		0}
 };
 
-int *action(s)
-char *s;
+int *
+action(char *s)
 {
 	struct keys *kp;
 	for (kp=keybuff; kp->k_wd; kp++)
@@ -578,8 +583,8 @@ int nwh = 0;
 char whbuff[NWCH];
 char *whcp = whbuff;
 
-setdid(lesson, sequence)
-char *lesson;
+void
+setdid(char *lesson, int sequence)
 {
 	struct whichdid *pw;
 	for(pw=which; pw < which+nwh; pw++)
@@ -595,15 +600,15 @@ char *lesson;
 	}
 	pw->w_seq = sequence;
 	pw->w_less = whcp;
-	while (*whcp++ = *lesson++);
+	while ((*whcp++ = *lesson++) != 0);
 	if (whcp >= whbuff + NWCH) {
 		fprintf(stderr, "lesson name too long\n");
 		wrapup(1);
 	}
 }
 
-already(lesson, sequence)
-char *lesson;
+int
+already(char *lesson, int sequence)
 {
 	struct whichdid *pw;
 	for (pw=which; pw < which+nwh; pw++)
@@ -617,8 +622,8 @@ char *lesson;
 #define	MEDIUM	2
 #define	HARD	3
 
-mysys(s)
-char *s;
+int
+mysys(char *s)
 {
 	/* like "system" but rips off "mv", etc.*/
 	/* also tries to guess if can get away with exec cmd */
@@ -687,7 +692,8 @@ char *s;
  *	user gets the behavior he expects.
  */
 
-int system(const char *s)
+int
+system(const char *s)
 {
 	int status;
 	pid_t pid, w;
@@ -710,8 +716,8 @@ int system(const char *s)
 	return(status);
 }
 
-getargs(s, v)
-char *s, **v;
+int
+getargs(char *s, char **v)
 {
 	int i;
 
@@ -731,9 +737,8 @@ char *s, **v;
 	return(i);
 }
 
-
-selsub(argc,argv)
-char *argv[];
+void
+selsub(int argc, char *argv[])
 {
 	char ans1[100], *cp;
 	static char ans2[30];
@@ -820,8 +825,8 @@ char *argv[];
 	start(level);
 }
 
-chknam(name)
-char *name;
+void
+chknam(char *name)
 {
 	if (access(name, R_OK|X_OK) < 0) {
 		printf("Sorry, there is no subject or lesson named %s.\nBye.\n", name);
@@ -832,7 +837,8 @@ char *name;
 
 int	nsave	= 0;
 
-selunit()
+void
+selunit(void)
 {
 	char fnam[1024], s[1024];
 	static char dobuff[50];
@@ -918,12 +924,14 @@ retry:
 	fclose(f);
 }
 
-abs(x)
+int
+abs(int x)
 {
 	return(x>=0? x: -x);
 }
 
-grand()
+int
+grand(void)
 {
 	static int garbage;
 	int a[2], b;
@@ -935,6 +943,7 @@ grand()
 
 #define	ND	64
 
+void
 start(char *lesson)
 {
 	struct direct {
@@ -980,8 +989,8 @@ start(char *lesson)
 	wrapup(1);
 }
 
-fcopy(new,old)
-char *new, *old;
+void
+fcopy(char *new, char *old)
 {
 	char b[512];
 	int n, fn, fo;
@@ -995,8 +1004,8 @@ char *new, *old;
 	close(fo);
 }
 
-
-whatnow()
+void
+whatnow(void)
 {
 	if (todo == 0) {
 		more=0;
@@ -1022,9 +1031,8 @@ whatnow()
 	}
 }
 
-
-wrapup(n)
-int n;
+void
+wrapup(int n)
 {
 	/* this routine does not use 'system' because it wants
 	 interrupts turned off */
