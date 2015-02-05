@@ -31,10 +31,10 @@ THIS SOFTWARE.
 
 #include <err.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <signal.h>
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -49,7 +49,7 @@ char	*sname;
 char	*todo;
 FILE	*incopy	= NULL;
 int	didok;
-int	sequence	= 1;
+int	sequence = 1;
 int	comfile	= -1;
 int	status;
 int	wrong;
@@ -75,7 +75,7 @@ main(int argc, char *argv[])
 		whatnow();
 	}
 	wrapup(0);
-	return 0;
+	return (0);
 }
 
 void
@@ -115,7 +115,7 @@ copy(int prompt, FILE *fin)
 	time_t tval;
 	int nmatch = 0;
 
-	if (subdir[0]==0)
+	if (subdir[0] == 0)
 		snprintf(subdir, sizeof subdir, "%s/%s", _PATH_LLIB, sname);
 	for (;;) {
 		if (pgets(s, sizeof s, prompt, fin) == 0) {
@@ -132,13 +132,15 @@ copy(int prompt, FILE *fin)
 		/* if needed */
 		for (r = s; *r; r++)
 			if (*r == '%') {
-				snprintf(s1, sizeof s1, s, subdir, subdir, subdir);
+				snprintf(s1, sizeof s1, s,
+				    subdir, subdir, subdir);
 				strlcpy(s, s1, sizeof s);
 				break;
 			}
 		r = wordb(s, t);
 		p = action(t);
-		if (p && *p == ONCE) {	/* some actions done only once per script */
+		/* some actions done only once per script */
+		if (p && *p == ONCE) {
 			if (wrong) {	/* we are on 2nd time */
 				scopy(fin, NULL);
 				continue;
@@ -172,7 +174,7 @@ copy(int prompt, FILE *fin)
 			return;
 		case PRINT:
 			if (wrong)
-				scopy(fin, NULL);	/* don't repeat message */
+				scopy(fin, NULL);	/* don't repeat msg */
 			else if (r)
 				list(r);
 			else
@@ -183,16 +185,17 @@ copy(int prompt, FILE *fin)
 		case MATCH:
 			if (nmatch > 0)	/* we have already passed */
 				scopy(fin, NULL);
-			else if ((status = strcmp(r, last)) == 0) {	/* did we pass this time? */
+			/* did we pass this time? */
+			else if ((status = strcmp(r, last)) == 0) {
 				nmatch++;
 				scopy(fin, stdout);
 			} else
 				scopy(fin, NULL);
 			break;
 		case BAD:
-			if (strcmp(r, last) == 0) {
+			if (strcmp(r, last) == 0)
 				scopy(fin, stdout);
-			} else
+			else
 				scopy(fin, NULL);
 			break;
 		case SUCCEED:
@@ -250,7 +253,7 @@ copy(int prompt, FILE *fin)
 			fflush(stdout);
 			break;
 		case BYE:
-			more=0;
+			more = 0;
 			return;
 		case CHDIR:
 			printf("cd not allowed\n");
@@ -263,8 +266,10 @@ copy(int prompt, FILE *fin)
 		case LOG:
 			if (!logging)
 				break;
-			if (logfile[0] == 0)
-				snprintf(logfile, sizeof logfile, "%s/log/%s", direct, sname);
+			if (logfile[0] == 0) {
+				snprintf(logfile, sizeof logfile,
+				    "%s/log/%s", direct, sname);
+			}
 			f = fopen((r ? r : logfile), "a");
 			if (f == NULL)
 				break;
@@ -272,7 +277,7 @@ copy(int prompt, FILE *fin)
 			tod = ctime(&tval);
 			tod[24] = 0;
 			fprintf(f, "%s L%-6s %s %2d %s\n", tod,
-				todo, status? "fail" : "pass", speed, pwline);
+			    todo, status? "fail" : "pass", speed, pwline);
 			fclose(f);
 			break;
 		}
@@ -289,12 +294,12 @@ pgets(char *s, int len, int prompt, FILE *f)
 		fflush(stdout);
 	}
 	if (fgets(s, len, f) != NULL)
-		return(1);
+		return (1);
 	else
-		return(0);
+		return (0);
 }
 
-/** Trim trailing newline */
+/* Trim trailing newline */
 void
 trim(char *s)
 {
@@ -335,7 +340,7 @@ cmp(char *r)	/* compare two files for status */
 	f1 = fopen(r, "r");
 	f2 = fopen(s, "r");
 	if (f1 == NULL || f2 == NULL)
-		return(1);	/* failure */
+		return (1);	/* failure */
 	stat = 0;
 	for (;;) {
 		c1 = getc(f1);
@@ -349,7 +354,7 @@ cmp(char *r)	/* compare two files for status */
 	}
 	fclose(f1);
 	fclose(f2);
-	return(stat);
+	return (stat);
 }
 
 char *
@@ -365,7 +370,7 @@ wordb(char *s, char *t)	/* in s, t is prefix; return tail */
 	*t = 0;
 	while (*s == ' ' || *s == '\t')
 		s++;
-	return(c ? s : NULL);
+	return (c ? s : NULL);
 }
 
 void
@@ -401,10 +406,10 @@ retry:
 	didok = (status == 0);
 	if (!didok) {
 		wrong++;
-		printf("\nSorry, that's %snot right.  Do you want to try again?  ",
-			wrong > 1 ? "still " : "");
+		printf("\nSorry, that's %snot right.  Try again?  ",
+		    wrong > 1 ? "still " : "");
 		fflush(stdout);
-		for(;;) {
+		for (;;) {
 			if (fgets(tbuff, sizeof tbuff, stdin) == NULL)
 				errx(1, "could not read input");
 			trim(tbuff);
@@ -412,9 +417,9 @@ retry:
 				printf("Try the problem again.\n");
 				fflush(stdout);
 				goto retry;
-			} else if (strcmp(tbuff, "bye") == 0) {
+			} else if (strcmp(tbuff, "bye") == 0)
 				wrapup(1);
-			} else if (tbuff[0] == 'n') {
+			else if (tbuff[0] == 'n') {
 				wrong = 0;
 				printf("\nOK.  Lesson %s (%d)\n", todo, speed);
 				printf("Skipping to next lesson.\n\n");
@@ -437,7 +442,7 @@ list(char *r)
 	FILE *ft;
 	char s[200];
 
-	if (r==0)
+	if (r == 0)
 		return;
 	istop = 1;
 	signal(SIGINT, signal_stop);
@@ -453,7 +458,7 @@ list(char *r)
 void
 signal_stop(int signo)
 {
-	istop=0;
+	istop = 0;
 }
 
 int
@@ -462,18 +467,18 @@ makpipe(void)
 	int f[2];
 
 	pipe(f);
-	if (fork()==0) {
+	if (fork() == 0) {
 		close(f[1]);
 		close(0);
 		dup(f[0]);
 		close(f[0]);
-		execl ("/bin/sh", "sh", "-i", (char *)NULL);
-		execl ("/usr/bin/sh", "sh", "-i", (char *)NULL);
+		execl("/bin/sh", "sh", "-i", (char *)NULL);
+		execl("/usr/bin/sh", "sh", "-i", (char *)NULL);
 		write(2,"Exec error\n",11);
 	}
 	close(f[0]);
 	sleep(2);	/* so shell won't eat up too much input */
-	return(f[1]);
+	return (f[1]);
 }
 
 static int oldout;
@@ -488,14 +493,14 @@ maktee(void)
 		snprintf(tee, sizeof tee, "%s/tee", direct);
 	pipe(fpip);
 	in = fpip[0];
-	out= fpip[1];
+	out = fpip[1];
 	if (fork() == 0) {
 		signal(SIGINT, SIG_IGN);
 		close(0);
 		close(out);
 		dup(in);
 		close(in);
-		execl (tee, "lrntee", (char *)NULL);
+		execl(tee, "lrntee", (char *)NULL);
 		fprintf(stderr, "Tee exec failed\n");
 		exit(1);
 	}
@@ -506,7 +511,7 @@ maktee(void)
 	if (dup(out) != 1)
 		fprintf(stderr, "Error making tee for copyout\n");
 	close(out);
-	return(1);
+	return (1);
 }
 
 void
@@ -564,14 +569,15 @@ int *
 action(char *s)
 {
 	struct keys *kp;
-	for (kp=keybuff; kp->k_wd; kp++)
+	for (kp = keybuff; kp->k_wd; kp++)
 		if (strcmp(kp->k_wd, s) == SAME)
-			return(&(kp->k_val));
-	return(NULL);
+			return (&(kp->k_val));
+	return (NULL);
 }
 
 # define NW 100
 # define NWCH 800
+
 struct whichdid {
 	char *w_less;
 	int w_seq;
@@ -584,20 +590,21 @@ void
 setdid(char *lesson, int seq)
 {
 	struct whichdid *pw;
-	for(pw=which; pw < which+nwh; pw++)
-		if (strcmp(pw->w_less, lesson) == SAME)
-			{
+	for (pw = which; pw < which + nwh; pw++) {
+		if (strcmp(pw->w_less, lesson) == SAME) {
 			pw->w_seq = seq;
 			return;
-			}
-	pw=which+nwh++;
+		}
+	}
+	pw = which + nwh++;
 	if (nwh >= NW) {
-		fprintf(stderr, "nwh>=NW\n");
+		fprintf(stderr, "nwh >= NW\n");
 		wrapup(1);
 	}
 	pw->w_seq = seq;
 	pw->w_less = whcp;
-	while ((*whcp++ = *lesson++) != 0);
+	while ((*whcp++ = *lesson++) != 0)
+		;
 	if (whcp >= whbuff + NWCH) {
 		fprintf(stderr, "lesson name too long\n");
 		wrapup(1);
@@ -608,10 +615,11 @@ int
 already(char *lesson)
 {
 	struct whichdid *pw;
-	for (pw=which; pw < which+nwh; pw++)
+	for (pw = which; pw < which + nwh; pw++) {
 		if (strcmp(pw->w_less, lesson) == SAME)
-			return(1);
-	return(0);
+			return (1);
+	}
+	return (0);
 }
 
 
@@ -622,9 +630,11 @@ already(char *lesson)
 int
 mysys(char *s)
 {
-	/* like "system" but rips off "mv", etc.*/
-	/* also tries to guess if can get away with exec cmd */
-	/* instead of sh cmd */
+	/*
+	 * like "system" but rips off "mv", etc.
+	 * also tries to guess if it can get away with exec cmd
+	 * instead of sh cmd
+	 */
 	char p[300];
 	char *np[40];
 	char *t;
@@ -652,19 +662,17 @@ mysys(char *s)
 	}
 	switch (type) {
 	case HARD:
-		return(system(s));
+		return (system(s));
 	case MEDIUM:
 		strlcpy(p, "exec ", sizeof p);
 		strlcat(p, s, sizeof p);
-		return(system(p));
+		return (system(p));
 	case EASY:
 		strlcpy(p, s, sizeof p);
 		nv = getargs(p, np);
-		t=np[0];
-		if ((strcmp(t, "mv") == 0)||
-		    (strcmp(t, "cp") == 0)||
-		    (strcmp(t, "rm") == 0)||
-		    (strcmp(t, "ls") == 0) ) {
+		t = np[0];
+		if ((strcmp(t, "mv") == 0) || (strcmp(t, "cp") == 0) ||
+		    (strcmp(t, "rm") == 0) || (strcmp(t, "ls") == 0)) {
 			if (fork() == 0) {
 				char b[100];
 				signal(SIGINT, SIG_DFL);
@@ -676,9 +684,9 @@ mysys(char *s)
 				exit(1);
 			}
 			wait(&stat);
-			return(stat);
+			return (stat);
 		}
-		return(system(s));
+		return (system(s));
 	}
 }
 
@@ -710,7 +718,7 @@ system(const char *s)
 		stat = -1;
 	signal(SIGINT, istat);
 	signal(SIGQUIT, qstat);
-	return(stat);
+	return (stat);
 }
 
 int
@@ -720,18 +728,18 @@ getargs(char *s, char **v)
 
 	i = 0;
 	for (;;) {
-		v[i++]=s;
-		while (*s != 0 && *s!=' '&& *s != '\t')
+		v[i++] = s;
+		while (*s != 0 && *s != ' ' && *s != '\t')
 			s++;
 		if (*s == 0)
 			break;
-		*s++ =0;
+		*s++ = 0;
 		while (*s == ' ' || *s == '\t')
 			s++;
 		if (*s == 0)
 			break;
 	}
-	return(i);
+	return (i);
 }
 
 void
@@ -742,7 +750,7 @@ selsub(int argc, char *argv[])
 	static char subname[20];
 
 	if (argc > 1 && argv[1][0] == '-') {
-		direct = argv[1]+1;
+		direct = argv[1] + 1;
 		argc--;
 		argv++;
 	}
@@ -753,20 +761,20 @@ selsub(int argc, char *argv[])
 	}
 	sname = argc > 1 ? argv[1] : 0;
 	if (argc > 2)
-		strlcpy(level=ans2, argv[2], sizeof ans2);
+		strlcpy(level = ans2, argv[2], sizeof ans2);
 	else
 		level = 0;
 	if (argc > 3 )
 		speed = atoi(argv[3]);
 	if (!sname) {
-		printf("These are the available courses -\n");
+		printf("These are the available courses:\n");
 		list("Linfo");
 		printf("If you want more information about the courses,\n");
 		printf("or if you have never used 'learn' before,\n");
 		printf("type 'return'; otherwise type the name of\n");
 		printf("the course you want, followed by 'return'.\n");
 		fflush(stdout);
-		if (fgets(sname=subname, sizeof subname, stdin) == NULL)
+		if (fgets(sname = subname, sizeof subname, stdin) == NULL)
 			errx(1, "could not read input");
 		trim(sname);
 		if (sname[0] == '\0') {
@@ -774,7 +782,8 @@ selsub(int argc, char *argv[])
 			do {
 				printf("\nWhich subject?  ");
 				fflush(stdout);
-				if (fgets(sname=subname, sizeof subname, stdin) == NULL)
+				if (fgets(sname = subname, sizeof subname,
+				    stdin) == NULL)
 					errx(1, "could not read input");
 				trim(sname);
 			} while (sname[0] == '\0');
@@ -790,27 +799,32 @@ selsub(int argc, char *argv[])
 		if (fgets(ans2, sizeof ans2, stdin) == NULL)
 			errx(1, "could not read input");
 		trim(ans2);
-		if (ans2[0]==0)
-			strlcpy(ans2,"0", sizeof ans2);
-		for (cp=ans2; *cp; cp++)
+		if (ans2[0] == 0)
+			strlcpy(ans2, "0", sizeof ans2);
+		for (cp = ans2; *cp; cp++) {
 			if (*cp == '(' || *cp == ' ')
-				*cp= 0;
-		level=ans2;
+				*cp = 0;
+		}
+		level = ans2;
 	}
 
 	/* make new directory for user to play in */
-	if ((playdir=mkdtemp(strdup("/tmp/plXXXXXX"))) == NULL ||
+	if ((playdir = mkdtemp(strdup("/tmp/plXXXXXX"))) == NULL ||
 	     chdir(playdir) < 0) {
-		fprintf(stderr, "Couldn't create playpen directory %s.\n", playdir);
+		fprintf(stderr, "Couldn't create playpen directory %s.\n",
+		    playdir);
 		fprintf(stderr, "Bye.\n");
 		exit(1);
 	}
 
-	/* after this point, we have a working directory. */
-	/* have to call wrapup to clean up */
+	/*
+	 * after this point, we have a working directory.
+	 * have to call wrapup to clean up
+	 */
 	snprintf(ans1, sizeof ans1, "%s/%s/Init", direct, sname);
 	if (access(ans1, R_OK)==0) {
-		snprintf(ans1, sizeof ans1, "%s/%s/Init %s", direct,sname, level);
+		snprintf(ans1, sizeof ans1, "%s/%s/Init %s",
+		    direct, sname, level);
 		if (system(ans1) != 0) {
 			printf("Leaving learn.\n");
 			wrapup(1);
@@ -824,14 +838,13 @@ selsub(int argc, char *argv[])
 void
 chknam(char *name)
 {
-	if (access(name, R_OK|X_OK) < 0) {
-		printf("Sorry, there is no subject or lesson named %s.\nBye.\n", name);
+	if (access(name, R_OK | X_OK) < 0) {
+		printf("Sorry, no subject or lesson named %s.\nBye.\n", name);
 		exit(1);
 	}
 }
 
-
-int	nsave	= 0;
+int nsave = 0;
 
 void
 selunit(void)
@@ -860,18 +873,19 @@ selunit(void)
 	}
 	alts = 0;
 retry:
-	f=scrin;
-	if (f==NULL) {
-		snprintf(fnam, sizeof fnam, "%s/%s/L%s", _PATH_LLIB, sname, level);
+	f = scrin;
+	if (f == NULL) {
+		snprintf(fnam, sizeof fnam, "%s/%s/L%s",
+		    _PATH_LLIB, sname, level);
 		f = fopen(fnam, "r");
-		if (f==NULL) {
+		if (f == NULL) {
 			fprintf(stderr, "No script for lesson %s.\n", level);
 			err(1, "%s", fnam);
 			wrapup(1);
 		}
 		while (fgets(zb, sizeof zb, f)) {
 			trim(zb);
-			if (strcmp(zb, "#next")==0)
+			if (strcmp(zb, "#next") == 0)
 				break;
 		}
 	}
@@ -881,40 +895,43 @@ retry:
 		todo = 0;
 		return;
 	}
-	for(i=0; fgets(s, 50, f); i++) {
+	for (i = 0; fgets(s, 50, f); i++)
 		sscanf(s, "%s %d", posslev[i], &diff[i]);
-	}
 	best = -1;
-	/* cycle through lessons from random start */
-	/* first try the current place, failing that back up to
-	     last place there are untried alternatives (but only one backup) */
+	/*
+	 * cycle through lessons from random start
+	 * first try the current place, failing that back up to
+	 * last place there are untried alternatives (but only one backup)
+	 */
 	n = arc4random_uniform(077777) % i;
-	for(k=0; k<i; k++) {
-		m = (n+k)%i;
-		if (already(posslev[m])) continue;
-		if (best<0) best=m;
+	for (k = 0; k < i; k++) {
+		m = (n + k) % i;
+		if (already(posslev[m]))
+			continue;
+		if (best < 0)
+			best = m;
 		/* real alternatives */
 		alts++;
-		if (abs(diff[m]-speed) < abs(diff[best]-speed))
-			best=m;
+		if (abs(diff[m] - speed) < abs(diff[best] - speed))
+			best = m;
 	}
 	if (best < 0 && nsave) {
 		nsave--;
 		strlcpy(level, saved, sizeof level);
 		goto retry;
 	}
-	if (best <0) {
+	if (best < 0) {
 		/* lessons exhausted or missing */
-		printf("Sorry, there are no alternative lessons at this stage.\n");
+		printf("Sorry, there are no other lessons at this stage.\n");
 		printf("See someone for help.\n");
 		fflush(stdout);
 		todo = 0;
 		return;
 	}
 	strlcpy(dobuff, posslev[best], sizeof dobuff);
-	if (alts>1) {
-		nsave=1;
-		strlcpy (saved, level, sizeof saved);
+	if (alts > 1) {
+		nsave = 1;
+		strlcpy(saved, level, sizeof saved);
 	}
 	todo = dobuff;
 	fclose(f);
@@ -923,7 +940,7 @@ retry:
 int
 abs(int x)
 {
-	return(x>=0? x: -x);
+	return (x >= 0 ? x : -x);
 }
 
 #define	ND	64
@@ -935,13 +952,13 @@ start(char *lesson)
 		int inode; 
 		char name[14];
 	};
-#if	0
+#if 0
 	struct direct dv[ND], *dm, *dp;
 	int f, c, n;
 #endif
 	char where [1024];
 
-#if	0
+#if 0
 	/* I'm not sure the point of this loop to unlink files, it may be
 	 * some kind of cleanup. I'm sure I don't like unlinking files
 	 * like this and, anyway, it would all have to be recoded using
@@ -950,16 +967,16 @@ start(char *lesson)
 	f = open(".", O_RDONLY);
 	n = read(f, dv, ND*sizeof(*dp));
 	n /= sizeof(*dp);
-	if (n==ND)
+	if (n == ND)
 		fprintf(stderr, "lesson too long\n");
-	dm = dv+n;
-	for(dp=dv; dp<dm; dp++)
+	dm = dv + n;
+	for (dp = dv; dp < dm; dp++)
 		if (dp->inode) {
 			n = strlen(dp->name);
-			if (dp->name[n-2] == '.' && dp->name[n-1] == 'c')
+			if (dp->name[n - 2] == '.' && dp->name[n - 1] == 'c')
 				continue;
 			c = dp->name[0];
-			if (c>='a' && c<= 'z')
+			if (c >= 'a' && c <= 'z')
 				unlink(dp->name);
 		}
 	close(f);
@@ -967,9 +984,9 @@ start(char *lesson)
 		return;
 #endif
 	snprintf(where, sizeof where, "%s/%s/L%s", _PATH_LLIB, sname, lesson);
-	if (access(where, R_OK)==0)	/* there is a file */
+	if (access(where, R_OK) == 0)	/* there is a file */
 		return;
-	fprintf(stderr, "No lesson %s\n",lesson);
+	fprintf(stderr, "No lesson %s\n", lesson);
 	err(1, "%s", where);
 	wrapup(1);
 }
@@ -981,9 +998,9 @@ fcopy(char *new, char *old)
 	int n, fn, fo;
 	fn = creat(new, 0666);
 	fo = open(old, O_RDONLY);
-	if (fo<0) return;
-	if (fn<0) return;
-	while ( (n=read(fo, b, 512)) > 0)
+	if ((fo < 0) || (fn < 0))
+		return;
+	while ((n = read(fo, b, 512)) > 0)
 		write(fn, b, n);
 	close(fn);
 	close(fo);
@@ -993,25 +1010,29 @@ void
 whatnow(void)
 {
 	if (todo == 0) {
-		more=0;
+		more = 0;
 		return;
 	}
 	if (didok) {
 		strlcpy(level, todo, sizeof level);
-		if (speed<=9) speed++;
-	}
-	else {
+		if (speed <= 9)
+			speed++;
+	} else {
 		speed -= 4;
-		/* the 4 above means that 4 right, one wrong leave
-		    you with the same speed. */
-		if (speed <0) speed=0;
+		/*
+		 * The 4 above means that four right and one wrong
+		 * leave you with the same speed.
+		 */
+		if (speed < 0)
+			speed = 0;
 	}
 	if (wrong) {
 		speed -= 2;
-		if (speed <0 ) speed = 0;
+		if (speed <0 )
+			speed = 0;
 	}
 	if (didok && more) {
-		printf("\nGood.  Lesson %s (%d)\n\n",level, speed);
+		printf("\nGood.  Lesson %s (%d)\n\n", level, speed);
 		fflush(stdout);
 	}
 }
@@ -1019,21 +1040,22 @@ whatnow(void)
 void
 wrapup(int n)
 {
-	/* this routine does not use 'system' because it wants
-	 interrupts turned off */
+	/*
+	 * This routine does not use 'system' because it wants
+	 * interrupts turned off.
+	 */
 	pid_t pid;
 
 	signal(SIGINT, SIG_IGN);
 	chdir("..");
-	if ( (pid=fork()) ==0) {
+	if ((pid = fork()) == 0) {
 		signal(SIGHUP, SIG_IGN);
 		execl("/bin/rm", "rm", "-r", playdir, (char *)NULL);
 		execl("/usr/bin/rm", "rm", "-r", playdir, (char *)NULL);
 		fprintf(stderr, "Can't find 'rm' command.\n");
 		exit(0);
 	}
-	printf("Bye.\n"); /* not only does this reassure user but 
-			it stalls for time while deleting directory */
+	printf("Bye.\n");
 	fflush(stdout);
 	exit(n);
 }

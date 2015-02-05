@@ -36,5 +36,5 @@ main(void)
 		if (c == '\n')
 			n++;
 	printf("%d\n", n);
-	return 0;
+	return (0);
 }

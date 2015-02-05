@@ -44,7 +44,7 @@ main(void)
 	char c;
 
 	PS1 = getenv("PS1");
-	if (PS1==0)
+	if (PS1 == 0)
 		PS1 = "$ ";
 	f = creat(".ocopy", 0666);
 	while (read(0, &c, 1) == 1) {
@@ -53,7 +53,7 @@ main(void)
 	}
 	fl(f);
 	close(f);
-	return 0;
+	return (0);
 }
 
 void
@@ -62,7 +62,7 @@ put(char c, int f)
 	*p++ = c;
 	if (c == '\n') {
 		fl(f);
-		p=ln;
+		p = ln;
 	}
 }
 
@@ -72,9 +72,9 @@ fl(int f)
 	char *s;
 
 	s = ln;
-	while (*s == '$' && *(s+1) == ' ')
+	while (*s == '$' && *(s + 1) == ' ')
 		s += 2;
 	if (strncmp(s, PS1, strlen(PS1)) == 0)
 		s += strlen(PS1);
-	write(f, s, p-s);
+	write(f, s, p - s);
 }
