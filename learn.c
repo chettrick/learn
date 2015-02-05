@@ -67,8 +67,8 @@ main(int argc, char *argv[])
 	pwline = getlogin();
 	setbuf(stdout, malloc(BUFSIZ));
 	selsub(argc, argv);
-	signal(SIGHUP, hangup);
-	signal(SIGINT, intrpt);
+	signal(SIGHUP, signal_hangup);
+	signal(SIGINT, signal_intrpt);
 	while (more) {
 		selunit();
 		dounit();
@@ -79,17 +79,17 @@ main(int argc, char *argv[])
 }
 
 void
-hangup(int x)
+signal_hangup(int signo)
 {
 	wrapup(1);
 }
 
 void
-intrpt(int x)
+signal_intrpt(int signo)
 {
 	char response[20], *p;
 
-	signal(SIGINT, hangup);
+	signal(SIGINT, signal_hangup);
 	write(2, "\nInterrupt.\nWant to go on?  ", 28);
 	p = response;
 	*p = 'n';
@@ -98,7 +98,7 @@ intrpt(int x)
 	if (response[0] != 'y')
 		wrapup(1);
 	ungetc('\n', stdin);
-	signal(SIGINT, intrpt);
+	signal(SIGINT, signal_intrpt);
 }
 
 char last[1024];
@@ -113,8 +113,6 @@ copy(int prompt, FILE *fin)
 	char nm[100];
 	int *p;
 	time_t tval;
-	extern int *action();
-	extern char *wordb();
 	int nmatch = 0;
 
 	if (subdir[0]==0)
@@ -157,7 +155,7 @@ copy(int prompt, FILE *fin)
 			else {
 				signal(SIGINT, SIG_IGN);
 				status = mysys(s);
-				signal(SIGINT, intrpt);
+				signal(SIGINT, signal_intrpt);
 			}
 			if (incopy) {
 				fprintf(incopy, "%s\n", s);
@@ -436,25 +434,24 @@ int istop;
 void
 list(char *r)
 {
-	void stop(int);
 	FILE *ft;
 	char s[200];
 
 	if (r==0)
 		return;
 	istop = 1;
-	signal(SIGINT, stop);
+	signal(SIGINT, signal_stop);
 	ft = fopen(r, "r");
 	if (ft != NULL) {
 		while (fgets(s, sizeof s, ft) && istop)
 			fputs(s, stdout);
 		fclose(ft);
 	}
-	signal(SIGINT, intrpt);
+	signal(SIGINT, signal_intrpt);
 }
 
 void
-stop(int x)
+signal_stop(int signo)
 {
 	istop=0;
 }
@@ -584,13 +581,13 @@ char whbuff[NWCH];
 char *whcp = whbuff;
 
 void
-setdid(char *lesson, int sequence)
+setdid(char *lesson, int seq)
 {
 	struct whichdid *pw;
 	for(pw=which; pw < which+nwh; pw++)
 		if (strcmp(pw->w_less, lesson) == SAME)
 			{
-			pw->w_seq = sequence;
+			pw->w_seq = seq;
 			return;
 			}
 	pw=which+nwh++;
@@ -598,7 +595,7 @@ setdid(char *lesson, int sequence)
 		fprintf(stderr, "nwh>=NW\n");
 		wrapup(1);
 	}
-	pw->w_seq = sequence;
+	pw->w_seq = seq;
 	pw->w_less = whcp;
 	while ((*whcp++ = *lesson++) != 0);
 	if (whcp >= whbuff + NWCH) {
@@ -608,7 +605,7 @@ setdid(char *lesson, int sequence)
 }
 
 int
-already(char *lesson, int sequence)
+already(char *lesson)
 {
 	struct whichdid *pw;
 	for (pw=which; pw < which+nwh; pw++)
@@ -695,7 +692,7 @@ mysys(char *s)
 int
 system(const char *s)
 {
-	int status;
+	int stat;
 	pid_t pid, w;
 	void (*istat)(int), (*qstat)(int);
 
@@ -707,13 +704,13 @@ system(const char *s)
 		execl("/bin/sh", "sh", "-c", s, (char *)NULL);
 		_exit(127);
 	}
-	while ((w = wait(&status)) != pid && w != -1)
+	while ((w = wait(&stat)) != pid && w != -1)
 		;
 	if (w == -1)
-		status = -1;
+		stat = -1;
 	signal(SIGINT, istat);
 	signal(SIGQUIT, qstat);
-	return(status);
+	return(stat);
 }
 
 int
@@ -742,7 +739,6 @@ selsub(int argc, char *argv[])
 {
 	char ans1[100], *cp;
 	static char ans2[30];
-	static char dirname[20];
 	static char subname[20];
 
 	if (argc > 1 && argv[1][0] == '-') {
@@ -895,7 +891,7 @@ retry:
 	n = grand()%i;
 	for(k=0; k<i; k++) {
 		m = (n+k)%i;
-		if (already(posslev[m],0)) continue;
+		if (already(posslev[m])) continue;
 		if (best<0) best=m;
 		/* real alternatives */
 		alts++;
@@ -1036,7 +1032,6 @@ wrapup(int n)
 {
 	/* this routine does not use 'system' because it wants
 	 interrupts turned off */
-	int retval;
 	pid_t pid;
 
 	signal(SIGINT, SIG_IGN);
@@ -1051,6 +1046,5 @@ wrapup(int n)
 	printf("Bye.\n"); /* not only does this reassure user but 
 			it stalls for time while deleting directory */
 	fflush(stdout);
-	/* printf("Wanted %ld got %ld val %d\n", (long)pid, (long)pidw, retval); */
 	exit(n);
 }

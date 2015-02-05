@@ -24,10 +24,10 @@ ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
 THIS SOFTWARE.
 ****************************************************************/
 
-#include "stdio.h"
+#include <stdio.h>
 
 int
-main()
+main(void)
 {
 	int n, c;
 
