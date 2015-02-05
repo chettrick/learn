@@ -41,22 +41,22 @@ THIS SOFTWARE.
 #include "learn.h"
 #include "pathnames.h"
 
-char	*direct	= _PATH_LLIB;
+char	*direct = _PATH_LLIB;
 int	more;
 char	*level;
 int	speed;
 char	*sname;
 char	*todo;
-FILE	*incopy	= NULL;
+FILE	*incopy = NULL;
 int	didok;
 int	sequence = 1;
-int	comfile	= -1;
+int	comfile = -1;
 int	status;
 int	wrong;
 char	*pwline;
 char	*playdir;
 FILE	*scrin;
-int	logging	= 0;	/* set to 0 to turn off logging */
+int	logging = 0;	/* set to 0 to turn off logging */
 int	ask;
 
 int
@@ -643,18 +643,18 @@ mysys(char *s)
 	type = EASY;	/* we hope */
 	for (t = s; *t && type != HARD; t++) {
 		switch (*t) {
-		case '*': 
-		case '[': 
-		case '?': 
-		case '>': 
-		case '<': 
+		case '*':
+		case '[':
+		case '?':
+		case '>':
+		case '<':
 		case '$':
 		case '\'':
 		case '"':
 			type = MEDIUM;
 			break;
-		case '|': 
-		case ';': 
+		case '|':
+		case ';':
 		case '&':
 			type = HARD;
 			break;
@@ -949,7 +949,7 @@ void
 start(char *lesson)
 {
 	struct direct {
-		int inode; 
+		int inode;
 		char name[14];
 	};
 #if 0
