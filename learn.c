@@ -888,7 +888,7 @@ retry:
 	/* cycle through lessons from random start */
 	/* first try the current place, failing that back up to
 	     last place there are untried alternatives (but only one backup) */
-	n = grand()%i;
+	n = arc4random_uniform(077777) % i;
 	for(k=0; k<i; k++) {
 		m = (n+k)%i;
 		if (already(posslev[m])) continue;
@@ -924,17 +924,6 @@ int
 abs(int x)
 {
 	return(x>=0? x: -x);
-}
-
-int
-grand(void)
-{
-	static int garbage;
-	int a[2], b;
-
-	time(a);
-	b = a[1]+10*garbage++;
-	return(b&077777);
 }
 
 #define	ND	64
