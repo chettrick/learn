@@ -79,13 +79,13 @@ main(int argc, char *argv[])
 }
 
 void
-signal_hangup(int signo)
+signal_hangup(int signo __attribute__ ((__unused__)))
 {
 	wrapup(1);
 }
 
 void
-signal_intrpt(int signo)
+signal_intrpt(int signo __attribute__ ((__unused__)))
 {
 	char response[20], *p;
 
@@ -456,7 +456,7 @@ list(char *r)
 }
 
 void
-signal_stop(int signo)
+signal_stop(int signo __attribute__ ((__unused__)))
 {
 	istop = 0;
 }
@@ -822,7 +822,7 @@ selsub(int argc, char *argv[])
 	 * have to call wrapup to clean up
 	 */
 	snprintf(ans1, sizeof ans1, "%s/%s/Init", direct, sname);
-	if (access(ans1, R_OK)==0) {
+	if (access(ans1, R_OK) == 0) {
 		snprintf(ans1, sizeof ans1, "%s/%s/Init %s",
 		    direct, sname, level);
 		if (system(ans1) != 0) {
