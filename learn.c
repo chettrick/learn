@@ -1014,6 +1014,7 @@ fcopy(char *new, char *old)
 void
 whatnow(void)
 {
+	printf("==============================================\n");
 	if (todo == 0) {
 		more = 0;
 		return;
