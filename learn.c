@@ -667,6 +667,7 @@ mysys(char *s)
 		strlcpy(p, "exec ", sizeof p);
 		strlcat(p, s, sizeof p);
 		return (system(p));
+	default:
 	case EASY:
 		strlcpy(p, s, sizeof p);
 		nv = getargs(p, np);
