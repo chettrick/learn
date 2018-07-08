@@ -7,6 +7,10 @@ MANDIR?=	${PREFIX}/man/man
 LLIB=		${PREFIX}/share/learn
 
 CFLAGS+=	-g
+ifeq ($(shell uname),Linux)
+CFLAGS+=	-D_BSD_SOURCE -lbsd -Wno-format-nonliteral
+.CURDIR=	$(shell pwd)
+endif
 CFLAGS+=	-Wall -Wextra -std=c99 -Wcast-qual -Wformat=2
 CFLAGS+=	-Wmissing-declarations -pedantic-errors -Wstrict-prototypes
 CFLAGS+=	-Wpointer-arith -Wuninitialized -Wmissing-prototypes
@@ -30,4 +34,7 @@ uninstall:
 	rm ${MANDIR}1/${PROG}.1
 	rm -R ${LLIB}
 
+ifeq ($(shell uname),Linux)
+else
 .include <bsd.prog.mk>
+endif

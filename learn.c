@@ -40,6 +40,10 @@ THIS SOFTWARE.
 
 #include "learn.h"
 #include "pathnames.h"
+#ifdef __linux__
+#include <bsd/stdlib.h>
+#include <bsd/string.h>
+#endif
 
 char	*direct = _PATH_LLIB;
 int	more;
@@ -1010,6 +1014,7 @@ fcopy(char *new, char *old)
 void
 whatnow(void)
 {
+	printf("==============================================\n");
 	if (todo == 0) {
 		more = 0;
 		return;
